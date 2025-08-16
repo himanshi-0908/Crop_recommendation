@@ -2,7 +2,7 @@ import pickle
 import numpy as np
 
 # Load model and scalers
-model = pickle.load(open('model.pkl', 'rb'))
+model = pickle.load(open('model (1).pkl', 'rb'))
 mx = pickle.load(open('minmaxscaler.pkl', 'rb'))
 sc = pickle.load(open('standscaler.pkl', 'rb'))
 
