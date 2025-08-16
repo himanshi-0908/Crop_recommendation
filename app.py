@@ -2,7 +2,7 @@ import streamlit as st
 import pickle
 
 # Load model
-model = pickle.load(open("model.pkl", "rb"))
+model = pickle.load(open("model (1).pkl", "rb"))
 
 st.title("Crop Recommendation System")
 
