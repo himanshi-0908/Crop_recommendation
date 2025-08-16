@@ -1,42 +1,53 @@
-import pickle
+from flask import Flask,request,render_template
 import numpy as np
+import pandas
+import sklearn
+import pickle
 
-# Load model and scalers
-model = pickle.load(open('model (1).pkl', 'rb'))
-mx = pickle.load(open('minmaxscaler.pkl', 'rb'))
-sc = pickle.load(open('standscaler.pkl', 'rb'))
+# importing model
+model = pickle.load(open('model.pkl','rb'))
+sc = pickle.load(open('standscaler.pkl','rb'))
+ms = pickle.load(open('minmaxscaler.pkl','rb'))
 
-# Input values
-N = 90
-P = 42
-k = 43
-temperature = 20.879744
-humidity = 82.002744
-ph = 6.502985
-rainfall = 202.935536
+# creating flask app
+app = Flask(__name__)
 
-# Put values into array
-input_data = np.array([[N, P, k, temperature, humidity, ph, rainfall]])
+@app.route('/')
+def index():
+    return render_template("index.html")
 
-# Apply same preprocessing as training
-input_data = mx.transform(input_data)
-input_data = sc.transform(input_data)
+@app.route("/predict",methods=['POST'])
+def predict():
+    N = request.form['Nitrogen']
+    P = request.form['Phosporus']
+    K = request.form['Potassium']
+    temp = request.form['Temperature']
+    humidity = request.form['Humidity']
+    ph = request.form['Ph']
+    rainfall = request.form['Rainfall']
 
-# Predict
-predict = model.predict(input_data)
+    feature_list = [N, P, K, temp, humidity, ph, rainfall]
+    single_pred = np.array(feature_list).reshape(1, -1)
 
-# Crop dictionary
-crop_dict = {
-    1: "Rice", 2: "Maize", 3: "Jute", 4: "Cotton", 5: "Coconut", 6: "Papaya", 7: "Orange",
-    8: "Apple", 9: "Muskmelon", 10: "Watermelon", 11: "Grapes", 12: "Mango", 13: "Banana",
-    14: "Pomegranate", 15: "Lentil", 16: "Blackgram", 17: "Mungbean", 18: "Mothbeans",
-    19: "Pigeonpeas", 20: "Kidneybeans", 21: "Chickpea", 22: "Coffee"
-}
+    scaled_features = ms.transform(single_pred)
+    final_features = sc.transform(scaled_features)
+    prediction = model.predict(final_features)
 
-# Get result
-predict_crop_index = predict[0]
-if predict_crop_index in crop_dict:
-    crop = crop_dict[predict_crop_index]
-    print(f"{crop} is a best crop to be cultivated")
-else:
-    print("Sorry, not able to recommend a proper crop for this environment")
+    crop_dict = {1: "Rice", 2: "Maize", 3: "Jute", 4: "Cotton", 5: "Coconut", 6: "Papaya", 7: "Orange",
+                 8: "Apple", 9: "Muskmelon", 10: "Watermelon", 11: "Grapes", 12: "Mango", 13: "Banana",
+                 14: "Pomegranate", 15: "Lentil", 16: "Blackgram", 17: "Mungbean", 18: "Mothbeans",
+                 19: "Pigeonpeas", 20: "Kidneybeans", 21: "Chickpea", 22: "Coffee"}
+
+    if prediction[0] in crop_dict:
+        crop = crop_dict[prediction[0]]
+        result = "{} is the best crop to be cultivated right there".format(crop)
+    else:
+        result = "Sorry, we could not determine the best crop to be cultivated with the provided data."
+    return render_template('index.html',result = result)
+
+
+
+
+# python main
+if __name__ == "__main__":
+    app.run(debug=True)
