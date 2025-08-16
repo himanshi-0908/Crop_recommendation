@@ -5,7 +5,7 @@ import sklearn
 import pickle
 
 # importing model
-model = pickle.load(open('model.pkl','rb'))
+model = pickle.load(open('model (1).pkl','rb'))
 sc = pickle.load(open('standscaler.pkl','rb'))
 ms = pickle.load(open('minmaxscaler.pkl','rb'))
 
